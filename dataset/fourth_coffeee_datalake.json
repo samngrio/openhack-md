@@ -1,0 +1,22 @@
+{
+	"name": "fourth_coffeee_datalake",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "srlakedev",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "raw/fourth-coffee",
+				"fileSystem": "sr-blob-container-dev"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
