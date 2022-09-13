@@ -44,10 +44,6 @@
 				"name": "UpdatedDate",
 				"type": "date"
 			}
-		],
-		"typeProperties": {
-			"schema": "dbo",
-			"table": "Addresses"
-		}
+		]
 	}
 }
