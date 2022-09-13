@@ -18,6 +18,14 @@
 		"MoviesDB_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MoviesDB'"
+		},
+		"srlakedev_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'srlakedev'"
+		},
+		"srlakedev_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://srlakedev.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -176,6 +184,23 @@
 				"type": "CosmosDb",
 				"typeProperties": {
 					"connectionString": "[parameters('MoviesDB_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/srlakedev')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('srlakedev_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('srlakedev_accountKey')]"
+					}
 				}
 			},
 			"dependsOn": []

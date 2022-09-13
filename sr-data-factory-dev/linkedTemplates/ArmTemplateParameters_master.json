@@ -14,6 +14,12 @@
 		"MoviesDB_connectionString": {
 			"value": ""
 		},
+		"srlakedev_accountKey": {
+			"value": ""
+		},
+		"srlakedev_properties_typeProperties_url": {
+			"value": "https://srlakedev.dfs.core.windows.net/"
+		},
 		"containerUri": {
 			"value": ""
 		},
