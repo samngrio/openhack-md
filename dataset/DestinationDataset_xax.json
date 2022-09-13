@@ -1,0 +1,19 @@
+{
+	"name": "DestinationDataset_xax",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "srlakedev",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "raw/movies",
+				"fileSystem": "sr-blob-container-dev"
+			}
+		},
+		"schema": {}
+	}
+}
