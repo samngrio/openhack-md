@@ -1,0 +1,29 @@
+{
+	"name": "DestinationDataset_9qm",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "srlakedev",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cw_fileName": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().cw_fileName",
+					"type": "Expression"
+				},
+				"folderPath": "raw/cloud-sales",
+				"fileSystem": "sr-blob-container-dev"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
