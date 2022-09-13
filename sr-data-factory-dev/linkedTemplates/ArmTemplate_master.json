@@ -23,6 +23,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MoviesDB'"
 		},
+		"VanArsdel_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'VanArsdel'"
+		},
 		"srlakedev_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'srlakedev'"
@@ -80,6 +84,9 @@
 					},
 					"Fourth Coffee_password": {
 						"value": "[parameters('Fourth Coffee_password')]"
+					},
+					"VanArsdel_connectionString": {
+						"value": "[parameters('VanArsdel_connectionString')]"
 					},
 					"srlakedev_properties_typeProperties_url": {
 						"value": "[parameters('srlakedev_properties_typeProperties_url')]"
