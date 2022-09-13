@@ -1,0 +1,20 @@
+{
+	"name": "DestinationDataset_1ls",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "srlakedev",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": "raw/fourth-coffee",
+				"fileSystem": "sr-blob-container-dev"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
