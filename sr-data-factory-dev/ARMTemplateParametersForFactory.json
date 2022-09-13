@@ -11,11 +11,20 @@
 		"CloudStreamingDB_connectionString": {
 			"value": ""
 		},
+		"Fourth Coffee_password": {
+			"value": ""
+		},
 		"MoviesDB_connectionString": {
 			"value": ""
 		},
 		"srlakedev_accountKey": {
 			"value": ""
+		},
+		"Fourth Coffee_properties_typeProperties_host": {
+			"value": "C:\\Rentals"
+		},
+		"Fourth Coffee_properties_typeProperties_userId": {
+			"value": "southridge"
 		},
 		"srlakedev_properties_typeProperties_url": {
 			"value": "https://srlakedev.dfs.core.windows.net/"

@@ -23,9 +23,21 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'srlakedev'"
 		},
+		"Fourth Coffee_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Fourth Coffee'"
+		},
 		"srlakedev_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://srlakedev.dfs.core.windows.net/"
+		},
+		"Fourth Coffee_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "C:\\Rentals"
+		},
+		"Fourth Coffee_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "southridge"
 		}
 	},
 	"variables": {
@@ -89,6 +101,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/shir-coffee')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/shir')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/CosmosDbSqlApiCollection1')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -145,6 +177,31 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/MoviesDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DestinationDataset_1ls')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "srlakedev",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "raw/fourth-coffee",
+						"fileSystem": "sr-blob-container-dev"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/srlakedev')]"
 			]
 		},
 		{
@@ -340,6 +397,30 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/srlakedev')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Fourth Coffee')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "FileServer",
+				"typeProperties": {
+					"host": "[parameters('Fourth Coffee_properties_typeProperties_host')]",
+					"userId": "[parameters('Fourth Coffee_properties_typeProperties_userId')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('Fourth Coffee_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "shir-coffee",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/shir-coffee')]"
 			]
 		},
 		{
@@ -660,6 +741,45 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SourceDataset_xax')]",
 				"[concat(variables('factoryId'), '/datasets/DestinationDataset_xax')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SourceDataset_1ls')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "Fourth Coffee",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "FileServerLocation"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "ActorID",
+						"type": "String"
+					},
+					{
+						"name": "ActorName",
+						"type": "String"
+					},
+					{
+						"name": "Gender",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/Fourth Coffee')]"
 			]
 		}
 	]

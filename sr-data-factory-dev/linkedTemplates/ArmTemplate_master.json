@@ -15,6 +15,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'CloudStreamingDB'"
 		},
+		"Fourth Coffee_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'Fourth Coffee'"
+		},
 		"MoviesDB_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'MoviesDB'"
@@ -22,6 +26,14 @@
 		"srlakedev_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'srlakedev'"
+		},
+		"Fourth Coffee_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "C:\\Rentals"
+		},
+		"Fourth Coffee_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "southridge"
 		},
 		"srlakedev_properties_typeProperties_url": {
 			"type": "string",
@@ -66,12 +78,41 @@
 					"srlakedev_accountKey": {
 						"value": "[parameters('srlakedev_accountKey')]"
 					},
+					"Fourth Coffee_password": {
+						"value": "[parameters('Fourth Coffee_password')]"
+					},
 					"srlakedev_properties_typeProperties_url": {
 						"value": "[parameters('srlakedev_properties_typeProperties_url')]"
+					},
+					"Fourth Coffee_properties_typeProperties_host": {
+						"value": "[parameters('Fourth Coffee_properties_typeProperties_host')]"
+					},
+					"Fourth Coffee_properties_typeProperties_userId": {
+						"value": "[parameters('Fourth Coffee_properties_typeProperties_userId')]"
 					}
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "sr-data-factory-dev_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'sr-data-factory-dev_ArmTemplate_0')]"
+			]
 		}
 	]
 }
