@@ -1,0 +1,12 @@
+{
+	"name": "CloudStreaming",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "CloudStreamingDB",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": []
+	}
+}
