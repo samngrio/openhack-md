@@ -338,14 +338,12 @@
 								}
 							},
 							"sink": {
-								"type": "DelimitedTextSink",
+								"type": "ParquetSink",
 								"storeSettings": {
 									"type": "AzureBlobFSWriteSettings"
 								},
 								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
+									"type": "ParquetWriteSettings"
 								}
 							},
 							"enableStaging": false,
@@ -360,7 +358,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "fourth_coffeee_datalake",
+								"referenceName": "fourth_coffee_parquet",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -375,7 +373,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/SourceDataset_1ls')]",
-				"[concat(variables('factoryId'), '/datasets/fourth_coffeee_datalake')]"
+				"[concat(variables('factoryId'), '/datasets/fourth_coffee_parquet')]"
 			]
 		},
 		{
@@ -940,6 +938,31 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/MoviesDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/fourth_coffee_parquet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "srlakedev",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "raw",
+						"fileSystem": "sr-blob-container-dev"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/srlakedev')]"
 			]
 		},
 		{
