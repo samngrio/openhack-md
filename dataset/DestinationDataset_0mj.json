@@ -1,0 +1,29 @@
+{
+	"name": "DestinationDataset_0mj",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "srlakedev",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cw_fileName": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().cw_fileName",
+					"type": "Expression"
+				},
+				"folderPath": "raw/vanarsdel",
+				"fileSystem": "sr-blob-container-dev"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": []
+	}
+}
