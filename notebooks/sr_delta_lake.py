@@ -11,7 +11,7 @@ dbutils.fs.ls("abfss://sr-blob-container-dev@srlakedev.dfs.core.windows.net/")
 
 def load(db, tables):
     db_ = db.replace('-', '_')
-    spark.sql(f'create database {db_}')
+#     spark.sql(f'create database {db_}')
     for table_name in tables:
         file = f'abfss://sr-blob-container-dev@srlakedev.dfs.core.windows.net/raw/{db}/{table_name}'
         df = spark.read.parquet(file)
@@ -24,6 +24,28 @@ load('cloud-sales', ['dboAddresses', 'dboCustomers', 'dboOrderDetails', 'dboOrde
 # COMMAND ----------
 
 load('cloud-streaming', ['dboAddresses', 'dboCustomers', 'dboTransactions'])
+
+# COMMAND ----------
+
+load('vanarsdel', ['dboActors', 'dboCustomers', 'dboMovieActors', 'dboMovies', 'dboOnlineMovieMappings'])
+
+# COMMAND ----------
+
+load('vanarsdel', ['dboTransactions'])
+
+# COMMAND ----------
+
+def load_fc(db, tables):
+    db_ = db.replace('-', '_')
+#     spark.sql(f'create database {db_}')
+    for table_name in tables:
+        file = f'abfss://sr-blob-container-dev@srlakedev.dfs.core.windows.net/raw/{db}/{table_name}.parquet'
+        df = spark.read.parquet(file)
+        df.write.saveAsTable(f'{db_}.{table_name}')
+
+# COMMAND ----------
+
+load_fc('fourth-coffee', ['Actors', 'Customers', 'MovieActors', 'Movies', 'OnlineMovieMappings', 'Transactions'])
 
 # COMMAND ----------
 
@@ -58,16 +80,11 @@ order_sources = {
 
 # COMMAND ----------
 
-orders.dtypes
+order_details_sources['Southridge'].dtypes
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC select * from fc_transactions
-
-# COMMAND ----------
-
-order_details.dtypes
+order_sources['Southridge'].dtypes
 
 # COMMAND ----------
 
@@ -76,13 +93,13 @@ from pyspark.sql.functions import lit
 
 # COMMAND ----------
 
-# order_details = order_details.withColumn('Quantity', order_details['Quantity'].cast('int'))
-
 source_ids = {
     'Southridge': 1,
     'VanArsdel Ltd': 2,
     'Fourth Coffee': 3
 }
+
+# COMMAND ----------
 
 
 def unify_order_details(source_dfs: dict):
@@ -90,8 +107,8 @@ def unify_order_details(source_dfs: dict):
     for source_name in source_dfs.keys():
         source_id = source_ids[source_name]
         order_details = source_dfs[source_name]
-        order_details = order_details.withColumn('Unit Cost', order_details['UnitCost'].cast('float'))
-        order_details = order_details.withColumn('Line Number', order_details['LineNumber'].cast('int'))
+        order_details = order_details.withColumn('UnitCost', order_details['UnitCost'].cast('float'))
+        order_details = order_details.withColumn('LineNumber', order_details['LineNumber'].cast('int'))
         order_details = order_details.withColumn('UniqueOrderID', concat(lit(source_id), order_details['OrderDetailID']))
         order_details = order_details.withColumn('OrderDetailsID', order_details['OrderDetailID'])
         order_details = order_details.withColumn('UniqueMovieID', concat(lit(source_id), order_details['MovieID']))
@@ -134,14 +151,23 @@ sales = orders.join(order_details, orders.OrderID == order_details.OrderID).sele
     "UniqueMovieID",
     "MovieID",
     "Quantity",
-    "Unit Cost",
-    "Line Number",
+    "UnitCost",
+    "LineNumber",
     "CustomerID",
     "UniqueCustomerID",
     "OrderDate",
     "ShipDate",
     "TotalCost"
 )
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC create database silver;
+
+# COMMAND ----------
+
+sales.write.saveAsTable('silver.sales')
 
 # COMMAND ----------
 
@@ -153,14 +179,109 @@ display(sales)
 
 # COMMAND ----------
 
-# MAGIC %sql
-# MAGIC create temporary view fc_transactions
-# MAGIC using csv
-# MAGIC options (
-# MAGIC path = 'abfss://sr-blob-container-dev@srlakedev.dfs.core.windows.net/raw/fourth-coffee/Transactions.txt',
-# MAGIC header = 'false'
-# MAGIC );
+spark.table('cloud_streaming.dbotransactions').dtypes
 
 # COMMAND ----------
 
+# MAGIC %sql
+# MAGIC create temporary view transactions_csv as 
+# MAGIC select * from text.`abfss://sr-blob-container-dev@srlakedev.dfs.core.windows.net/raw/fourth-coffee/Transactions.txt`
 
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from transactions_csv
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC create database fourth_coffee
+
+# COMMAND ----------
+
+spark.table('vanarsdel.dbomovies').dtypes
+
+# COMMAND ----------
+
+from pyspark.sql.types import *
+
+movies_schema = StructType([
+    StructField('MovieID', StringType(), False),
+    StructField('MovieTitle', StringType(), False),
+    StructField('Category', StringType(), False),
+    StructField('Rating', StringType(), False),
+    StructField('RunTimeMin', IntegerType(), False),
+    StructField('ReleaseDate', StringType(), False)])
+
+# COMMAND ----------
+
+def read_csv(file, schema):
+    return (spark.read
+      .format("csv")
+      .option("header", "false")
+      .schema(schema)
+      .load(f"abfss://sr-blob-container-dev@srlakedev.dfs.core.windows.net/raw/fourth-coffee/{file}.txt")
+    )
+
+# COMMAND ----------
+
+fc_movies = read_csv('Movies', movies_schema)
+
+# COMMAND ----------
+
+display(fc_movies)
+
+# COMMAND ----------
+
+fc_movies.write.saveAsTable('fourth_coffee.movies')
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC create database fourth_coffee
+
+# COMMAND ----------
+
+fc_movies.write.saveAsTable('fourth_coffee.dbomovies')
+
+# COMMAND ----------
+
+spark.table('vanarsdel.dbocustomers').dtypes
+
+# COMMAND ----------
+
+customers_schema = StructType([
+    StructField('CustomerID', StringType(), False),
+    StructField('FirstName', StringType(), False),
+    StructField('LastName', StringType(), False),
+    StructField('AddressLine1', StringType(), False),
+    StructField('AddressLine2', IntegerType(), False),
+    StructField('City', StringType(), False),
+    StructField('State', StringType(), False),
+    StructField('ZipCode', StringType(), False),
+    StructField('PhoneNumber', StringType(), False),
+    StructField('CreatedDate', DateType(), False),
+    StructField('UpdatedDate', DateType(), False),
+])
+
+# COMMAND ----------
+
+fc_customers = read_csv('Customers', customers_schema)
+
+# COMMAND ----------
+
+fc_customers.display()
+
+# COMMAND ----------
+
+fc_customers.write.saveAsTable('fourth_coffee.dbocustomers')
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from silver.sales
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from fourth_coffee.transactions
