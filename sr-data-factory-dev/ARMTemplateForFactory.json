@@ -954,7 +954,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": "raw",
+						"folderPath": "raw/fourth-coffee",
 						"fileSystem": "sr-blob-container-dev"
 					},
 					"compressionCodec": "snappy"
