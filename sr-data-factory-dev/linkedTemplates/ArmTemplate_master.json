@@ -85,9 +85,6 @@
 					"Fourth Coffee_password": {
 						"value": "[parameters('Fourth Coffee_password')]"
 					},
-					"VanArsdel_connectionString": {
-						"value": "[parameters('VanArsdel_connectionString')]"
-					},
 					"srlakedev_properties_typeProperties_url": {
 						"value": "[parameters('srlakedev_properties_typeProperties_url')]"
 					},
@@ -114,6 +111,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"VanArsdel_connectionString": {
+						"value": "[parameters('VanArsdel_connectionString')]"
 					}
 				}
 			},

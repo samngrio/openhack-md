@@ -27,10 +27,6 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'Fourth Coffee'"
 		},
-		"VanArsdel_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'VanArsdel'"
-		},
 		"srlakedev_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://srlakedev.dfs.core.windows.net/"
@@ -181,6 +177,40 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/MoviesDB')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DestinationDataset_0mj')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "srlakedev",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"cw_fileName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().cw_fileName",
+							"type": "Expression"
+						},
+						"folderPath": "raw/vanarsdel",
+						"fileSystem": "sr-blob-container-dev"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/srlakedev')]"
 			]
 		},
 		{
@@ -511,25 +541,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/integrationRuntimes/shir-coffee')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/VanArsdel')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": "[parameters('VanArsdel_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "shir",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/shir')]"
 			]
 		}
 	]
