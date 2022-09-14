@@ -20,11 +20,11 @@ jobs:
       - name: Generate and save AAD Token
         run: |
           echo "DATABRICKS_TOKEN=$(curl -X POST -H 'Content-Type: application/x-www-form-urlencoded' \
-            https://login.microsoftonline.com/${{ secrets.AZURE_SP_TENANT_ID }}/oauth2/v2.0/token \
-            -d 'client_id=${{ secrets.AZURE_SP_APPLICATION_ID }}' \
+            https://login.microsoftonline.com/d9a38472-71ad-4716-b682-4b2de2733c0a/oauth2/v2.0/token \
+            -d 'client_id=b35fd77a-6932-4fb3-9d23-5a15395b0a30' \
             -d 'grant_type=client_credentials' \
             -d 'scope=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d%2F.default' \
-            -d 'client_secret=${{ secrets.AZURE_SP_CLIENT_SECRET }}' |  jq -r  '.access_token')" >> $GITHUB_ENV
+            -d 'client_secret=qcV8Q~9-XvGQywEYVuyEXBYJ~yizdReY4K3tmalT' |  jq -r  '.access_token')" >> $GITHUB_ENV
       - name: Trigger test notebook from PR branch
         uses: databricks/run-notebook@v0
         with:
