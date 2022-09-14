@@ -4,6 +4,7 @@
 		"activities": [
 			{
 				"name": "ForEach_9qm",
+				"description": "test",
 				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
