@@ -1,0 +1,24 @@
+{
+	"name": "SourceDataset_0mj",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "VanArsdel",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"cw_table": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": {
+				"value": "@dataset().cw_table",
+				"type": "Expression"
+			}
+		}
+	}
+}
