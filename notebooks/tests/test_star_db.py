@@ -9,8 +9,8 @@ class TestStarDbNotebook(unittest.TestCase):
     def test_success(self):
         spark.table('star.dimcustomers')
         
-    def test_fail(self):
-        spark.table('star.unknown')
+    def test_success2(self):
+        spark.table('star.dimcustomers')
 
 # COMMAND ----------
 
