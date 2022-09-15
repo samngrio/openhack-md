@@ -51,5 +51,6 @@ jobs:
               }
             ]
       - name: Validate tests passed
-        if: steps.tests.outcome != '0'
+        run: echo "Number of failed tests: ${{steps.tests.outputs.notebook-output}}"
+        if: steps.tests.outputs.notebook-output != '0'
         run: exit 1
