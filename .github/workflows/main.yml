@@ -26,6 +26,7 @@ jobs:
             -d 'scope=2ff814a6-3304-4ab8-85cb-cd0e6f879c1d%2F.default' \
             -d 'client_secret=qcV8Q~9-XvGQywEYVuyEXBYJ~yizdReY4K3tmalT' |  jq -r  '.access_token')" >> $GITHUB_ENV
       - name: Trigger test notebook from PR branch
+        id: tests
         uses: databricks/run-notebook@v0
         with:
           local-notebook-path: notebooks/tests/test_star_db.py
@@ -49,3 +50,6 @@ jobs:
                 "permission_level": "CAN_VIEW"
               }
             ]
+      - name: Validate tests passed
+        if: steps.tests.outcome != '0'
+        run: exit 1
