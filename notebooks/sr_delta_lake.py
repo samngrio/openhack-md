@@ -101,7 +101,6 @@ source_ids = {
 
 # COMMAND ----------
 
-
 def unify_order_details(source_dfs: dict):
     result = None
     for source_name in source_dfs.keys():
@@ -127,8 +126,8 @@ def unify_orders(source_dfs: dict):
         source_id = source_ids[source_name]
         orders = source_dfs[source_name]
         #orders = orders.withColumn('OrderDate', orders['OrderDate'].cast(DateType()))
-        orders = orders.withColumn('SourceID', concat(lit('cloud_sales')))
-        orders = orders.withColumn('UniqueCustomerID', concat(lit('cloud_sales'), orders['CustomerID']))
+        orders = orders.withColumn('SourceID', lit(source_id))
+        orders = orders.withColumn('UniqueCustomerID', concat(lit(source_id), orders['CustomerID']))
         orders = orders.withColumn('TotalCost', orders['TotalCost'].cast('float'))
         if result:
             result = result.union(result)
@@ -285,3 +284,149 @@ fc_customers.write.saveAsTable('fourth_coffee.dbocustomers')
 
 # MAGIC %sql
 # MAGIC select * from fourth_coffee.transactions
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from vanarsdel.dbomovies
+
+# COMMAND ----------
+
+sb_catalog = spark.table('movies.movies_items')
+va_movies = spark.table('vanarsdel.dbomovies')
+va_actors = spark.table('vanarsdel.dboactors')
+va_movieactors = spark.table('vanarsdel.dbomovieactors')
+fc_movies = spark.table('fourth_coffee.movies')
+fc_actors = spark.table('fourth_coffee.actors')
+fc_movieactors = spark.table('fourth_coffee.movieactors')
+
+
+
+# COMMAND ----------
+
+from pyspark.sql.functions import explode
+import uuid
+import uuid
+from pyspark.sql.functions import udf
+
+uuidUdf= udf(lambda : str(uuid.uuid4()),StringType())
+
+actors_exploded = sb_catalog.select("*",explode(sb_catalog.actors).alias('actors_exp')).select('*', 'actors_exp.name')
+actors_exploded = actors_exploded.withColumn("SourceID", lit(1))
+actors_exploded = actors_exploded.withColumn("CatalogID",  uuidUdf())
+actors_exploded = actors_exploded.withColumn("ActorID", lit(1))
+actors_exploded = actors_exploded.withColumn("Actor", actors_exploded.name)
+actors_exploded = actors_exploded.withColumn("AvailabilityYear", actors_exploded.releaseYear.cast('int'))
+actors_exploded = actors_exploded.withColumn("ReleaseDate", actors_exploded.availabilityDate.cast('date'))
+actors_exploded = actors_exploded.withColumn("ReleaseDate", actors_exploded.streamingAvailabilityDate.cast('date'))
+actors_exploded = actors_exploded.withColumn("MovieTier", actors_exploded.tier)
+actors_exploded = actors_exploded.withColumn("MovieTitle", actors_exploded.title)
+actors_exploded = actors_exploded.withColumn("MovieID", actors_exploded.id)
+
+# COMMAND ----------
+
+sb_catalog = actors_exploded.select(
+"SourceID",
+"CatalogID",
+"ActorID",
+"Actor",
+"ReleaseDate",
+"Genre",
+"Rating",
+"AvailabilityYear",
+"AvailabilityDate",
+"MovieTier",
+"MovieTitle",
+"MovieID"
+)
+
+# COMMAND ----------
+
+va_catalog = va_movies.join(va_movieactors, va_movies.MovieID == va_movieactors.MovieID).join(va_actors, va_movieactors.ActorID == va_actors.ActorID).select('va_movies')
+va_catalog.display()
+
+
+# COMMAND ----------
+
+from pyspark.sql.functions import year
+va_catalog = va_catalog.withColumn("SourceID",  lit(2))
+va_catalog = va_catalog.withColumn("Genre",  lit("-"))
+va_catalog = va_catalog.withColumn("MovieTier",  lit(None).cast(StringType()))
+va_catalog = va_catalog.withColumn("CatalogID",  uuidUdf())
+va_catalog = va_catalog.withColumn("Actor",  va_catalog.ActorName)
+va_catalog = va_catalog.withColumn("AvailabilityYear",  year(va_catalog.ReleaseDate))
+va_catalog = va_catalog.withColumn("AvailabilityDate",  va_catalog.ReleaseDate)
+
+
+# COMMAND ----------
+
+
+va_catalog = va_catalog.select(
+"SourceID",
+"CatalogID",   
+va_actors["ActorID"],
+"Actor",
+"ReleaseDate",
+"Genre",
+"Rating",
+"AvailabilityYear",
+"AvailabilityDate",
+"MovieTier",
+"MovieTitle",
+va_movies["MovieID"]
+)
+
+# COMMAND ----------
+
+fc_catalog = fc_movies.join(fc_movieactors, fc_movies.MovieID == fc_movieactors.MovieID).join(fc_actors, fc_movieactors.ActorID == fc_actors.ActorID)
+fc_catalog.display()
+
+
+# COMMAND ----------
+
+fc_catalog = fc_catalog.withColumn("SourceID",  lit(3))
+fc_catalog = fc_catalog.withColumn("Genre",  lit("-"))
+fc_catalog = fc_catalog.withColumn("MovieTier",  lit(None).cast(StringType()))
+fc_catalog = fc_catalog.withColumn("CatalogID",  uuidUdf())
+fc_catalog = fc_catalog.withColumn("Actor",  fc_catalog.ActorName)
+fc_catalog = fc_catalog.withColumn("AvailabilityYear",  year(fc_catalog.ReleaseDate))
+fc_catalog = fc_catalog.withColumn("AvailabilityDate",  fc_catalog.ReleaseDate)
+
+# COMMAND ----------
+
+fc_catalog = fc_catalog.select(
+"SourceID",
+"CatalogID",   
+fc_actors["ActorID"],
+"Actor",
+"ReleaseDate",
+"Genre",
+"Rating",
+"AvailabilityYear",
+"AvailabilityDate",
+"MovieTier",
+"MovieTitle",
+fc_movies["MovieID"]
+)
+
+# COMMAND ----------
+
+fc_catalog.display()
+
+# COMMAND ----------
+
+full_catalog = sb_catalog.union(va_catalog).union(fc_catalog)
+
+# COMMAND ----------
+
+full_catalog.write.saveAsTable('silver.catalog')
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from silver.catalog
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from silver.sales
