@@ -179,7 +179,14 @@
 								{
 									"name": "Copy_8ny",
 									"type": "Copy",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "Lookup last watermark",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"policy": {
 										"timeout": "0.12:00:00",
 										"retry": 0,
@@ -200,6 +207,10 @@
 									"typeProperties": {
 										"source": {
 											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@concat('select *\nfrom ', item().source.table, ' \nwhere updateddate > ''', activity('Lookup last watermark').output.firstRow.watermarkValue,'''\nand updateddate <= ''', pipeline().parameters.new_watermark, '''')",
+												"type": "Expression"
+											},
 											"partitionOption": "None"
 										},
 										"sink": {
@@ -228,10 +239,80 @@
 											"referenceName": "DestinationDataset_8ny",
 											"type": "DatasetReference",
 											"parameters": {
-												"cw_fileName": "@item().destination.fileName"
+												"cw_fileName": {
+													"value": "@concat(utcNow(), '-', item().destination.fileName)",
+													"type": "Expression"
+												}
 											}
 										}
 									]
+								},
+								{
+									"name": "Lookup last watermark",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@concat('select WatermarkValue \nfrom watermarktable \nwhere TableName = ''', item().source.table,'''')",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "SourceDataset_8ny",
+											"type": "DatasetReference",
+											"parameters": {
+												"cw_table": "@item().source.table"
+											}
+										},
+										"firstRowOnly": true
+									}
+								},
+								{
+									"name": "Update watermark",
+									"type": "Script",
+									"dependsOn": [
+										{
+											"activity": "Copy_8ny",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "CloudStreamingDB",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"type": "Query",
+												"text": {
+													"value": "@concat('update watermarkTable set WatermarkValue = ''', pipeline().parameters.new_watermark,''' where TableName = ''', item().source.table, '''')",
+													"type": "Expression"
+												}
+											}
+										]
+									}
 								}
 							]
 						}
@@ -270,6 +351,9 @@
 								}
 							}
 						]
+					},
+					"new_watermark": {
+						"type": "string"
 					}
 				},
 				"annotations": []
