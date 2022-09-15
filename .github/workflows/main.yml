@@ -50,7 +50,9 @@ jobs:
                 "permission_level": "CAN_VIEW"
               }
             ]
-      - name: Validate tests passed
-        run: echo "Number of failed tests: ${{steps.tests.outputs.notebook-output}}"
+      - name: Failed tests
+        run: echo "Number of failed tests ${{ steps.tests.outputs.notebook-output }}"
+      - name: Exit on failed tests
         if: steps.tests.outputs.notebook-output != '0'
         run: exit 1
+        
